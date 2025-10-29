@@ -1,8 +1,8 @@
 import type { Tile } from './types'
 
-export const TILE_SIZE = 16
-export const MAP_W = 50 // 800 / 16
-export const MAP_H = 38 // cover 600px (608) and crop last row visually
+export const TILE_SIZE = 24
+export const MAP_W = 40 // 960 / 24
+export const MAP_H = 30 // 720 / 24
 
 export function generateMap(seed = 1): Tile[][] {
   const rnd = mulberry32(seed)
@@ -40,6 +40,9 @@ export function generateMap(seed = 1): Tile[][] {
 
   // Ensure the player start area is connected to open ground
   ensureStartConnected(map)
+
+  // Ensure a path to camp (top-right area) exists
+  ensureCampConnected(map)
 
   return map
 }
@@ -100,4 +103,24 @@ function carveLineAsTrail(map: Tile[][], x0: number, y0: number, x1: number, y1:
     if (e2 >= dy) { err += dy; x += sx }
     if (e2 <= dx) { err += dx; y += sy }
   }
+}
+
+// Clear a pocket around camp and carve a corridor from start (1,1) to camp.
+function ensureCampConnected(map: Tile[][]) {
+  const sx = 1, sy = 1
+  // Camp is drawn at approx (x=760px, y=40px) in game.ts; convert to tile
+  let cx = Math.floor(760 / TILE_SIZE)
+  let cy = Math.floor(40 / TILE_SIZE)
+  cx = Math.max(0, Math.min(MAP_W - 1, cx))
+  cy = Math.max(0, Math.min(MAP_H - 1, cy))
+
+  // Clear a 5x5 around camp (keep existing trails)
+  for (let y = Math.max(0, cy - 2); y <= Math.min(MAP_H - 1, cy + 2); y++) {
+    for (let x = Math.max(0, cx - 2); x <= Math.min(MAP_W - 1, cx + 2); x++) {
+      if (map[y][x] !== 3) map[y][x] = 0
+    }
+  }
+
+  // Carve corridor from start to camp
+  carveLineAsTrail(map, sx, sy, cx, cy)
 }

@@ -6,21 +6,22 @@
     <title>National Park Ranger</title>
     <style>
       html, body { height: 100%; margin: 0; background:#1b2a1b; color:#f2f2e8; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-      #root { display:flex; align-items:center; justify-content:center; height:100%; }
-      canvas { border: 2px solid #305430; background: #183018; image-rendering: pixelated; }
-      .hud { position: fixed; top: 8px; left: 8px; right: 8px; display:flex; gap:12px; justify-content: space-between; pointer-events:none; }
-      .hud .left, .hud .right { display:flex; gap:12px; }
+      #root { display:flex; align-items:center; justify-content:center; height:100%; padding: 8px; box-sizing: border-box; }
+      canvas { border: 2px solid #305430; background: #183018; image-rendering: pixelated; 
+        width: min(98vw, calc(98vh * 4 / 3)); height: auto; max-height: 98vh; aspect-ratio: 4 / 3; }
+      .hud { position: fixed; top: 10px; left: 10px; right: 10px; display:flex; gap:16px; justify-content: space-between; pointer-events:none; font-size: 16px; }
+      .hud .left, .hud .right { display:flex; gap:16px; }
       .badge { position: fixed; bottom: 10px; left: 10px; background:#2f4f2f; padding:6px 8px; border-radius:6px; pointer-events:none; font-size:12px; }
-      #overlay { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.35); pointer-events: auto; }
-      #overlay .panel { background:#2f4f2f; color:#f2f2e8; padding:16px 20px; border-radius:10px; min-width: 260px; text-align:center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-      #overlay .panel h2 { margin: 0 0 8px 0; font-size: 18px; }
-      #overlay .panel p { margin: 0 0 12px 0; font-size: 14px; }
-      #overlay .panel button { appearance: none; border:0; background:#3da93d; color:#102010; padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:600; }
+      #overlay { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.35); pointer-events: auto; padding: 12px; box-sizing: border-box; }
+      #overlay .panel { background:#2f4f2f; color:#f2f2e8; padding:22px 26px; border-radius:12px; min-width: 320px; text-align:center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+      #overlay .panel h2 { margin: 0 0 10px 0; font-size: 24px; }
+      #overlay .panel p { margin: 0 0 14px 0; font-size: 16px; }
+      #overlay .panel button { appearance: none; border:0; background:#3da93d; color:#102010; padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:700; font-size: 16px; }
     </style>
   </head>
   <body>
     <div id="root">
-      <canvas id="game" width="800" height="600"></canvas>
+      <canvas id="game" width="960" height="720"></canvas>
     </div>
     <div class="hud">
       <div class="left" id="hud-left"></div>

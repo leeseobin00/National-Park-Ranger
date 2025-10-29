@@ -157,8 +157,8 @@ export class Game {
         g.fillRect(px, py, TILE_SIZE, TILE_SIZE)
 
         // Emoji-style icons over tiles for vibe
-        if (t === 1) drawEmoji(g, '🌲', px + 8, py + 8)
-        if (t === 2 && Math.random() < 0.02) drawEmoji(g, '💧', px + 8, py + 8)
+        if (t === 1) drawEmoji(g, '🌲', px + TILE_SIZE / 2, py + TILE_SIZE / 2)
+        if (t === 2 && Math.random() < 0.02) drawEmoji(g, '💧', px + TILE_SIZE / 2, py + TILE_SIZE / 2)
       }
     }
 
@@ -170,7 +170,7 @@ export class Game {
     // Tasks
     for (const t of this.tasks.tasks) {
       if (!t.active) continue
-      if (t.type === 'trash') { g.fillStyle = '#8b5a2b'; g.fillRect(t.pos.x - 6, t.pos.y - 6, 12, 12); drawEmoji(g, '🗑️', t.pos.x, t.pos.y - 12) }
+      if (t.type === 'trash') { drawEmoji(g, '🗑️', t.pos.x, t.pos.y) }
       if (t.type === 'rescue') { drawEmoji(g, Math.random() < 0.5 ? '🐻' : '🦌', t.pos.x, t.pos.y) }
       if (t.type === 'bird') { drawEmoji(g, '🐦', t.pos.x, t.pos.y) }
     }
@@ -276,28 +276,33 @@ export class Game {
 }
 
 function drawAgent(g: CanvasRenderingContext2D, x: number, y: number, hatEmoji: string, color: string) {
+  const r = Math.floor(TILE_SIZE * 0.45)
   g.fillStyle = color
-  g.beginPath(); g.arc(x, y, 10, 0, Math.PI * 2); g.fill()
-  drawEmoji(g, hatEmoji, x, y - 12)
+  g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill()
+  drawEmoji(g, hatEmoji, x, y - r + 2)
 }
 
-function drawEmoji(g: CanvasRenderingContext2D, e: string, x: number, y: number) {
+function drawEmoji(g: CanvasRenderingContext2D, e: string, x: number, y: number, size: number = Math.floor(TILE_SIZE * 0.9)) {
   g.save()
   g.textAlign = 'center'
   g.textBaseline = 'middle'
-  g.font = '16px serif'
+  g.font = `${size}px serif`
   g.fillText(e, x, y)
   g.restore()
 }
 
 function banner(g: CanvasRenderingContext2D, text: string) {
   g.save()
+  const w = g.canvas.width
+  const h = g.canvas.height
+  const bh = 80
+  const by = Math.max(0, Math.floor(h / 2 - bh / 2))
   g.fillStyle = 'rgba(0,0,0,0.5)'
-  g.fillRect(0, 260, 800, 80)
+  g.fillRect(0, by, w, bh)
   g.fillStyle = '#f0f0e8'
   g.font = '24px system-ui'
   g.textAlign = 'center'
-  g.fillText(text, 400, 305)
+  g.fillText(text, Math.floor(w / 2), by + Math.floor(bh / 2) + 5)
   g.restore()
 }
 
