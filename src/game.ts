@@ -17,6 +17,7 @@ export class Game {
   tasks = new TaskQueue(this.map)
   state: GameState = { timeStart: performance.now(), timeNow: performance.now(), score: 0, poacherEscapes: 0, wins: false, loses: false, dayNightT: 0 }
   enablePoacher = false
+  finished = false
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas
@@ -36,7 +37,7 @@ export class Game {
       last = t
       this.update(dt)
       this.render()
-      requestAnimationFrame(loop)
+      if (!this.finished) requestAnimationFrame(loop)
     }
     requestAnimationFrame(loop)
   }
@@ -84,25 +85,14 @@ export class Game {
     // Win/Lose conditions (escape-based loss only; wins handled by stage rules)
     if (this.state.poacherEscapes >= 5) this.state.loses = true
 
-    // Stage timing and progression
+    // Global 60s session timer
     let timeLeft = 0
-    if (this.state.stageStartTime && this.state.stageTimeLimitSec) {
-      const stageElapsed = (this.state.timeNow - this.state.stageStartTime) / 1000
-      timeLeft = Math.max(0, this.state.stageTimeLimitSec - stageElapsed)
-      if (timeLeft === 0 && !this.state.wins && !this.state.loses) {
-        const met = (this.state.stageScore || 0) > (this.state.stageTargetScore || 0)
-        const current = this.state.stage || 1
-        if (met) {
-          if (current >= 5) {
-            this.state.wins = true
-            showOverlay('Congratulations', 'You completed all turns!', 'New Game', () => this.newGame())
-          } else {
-            showOverlay('Congratulations', `Turn ${current} cleared!`, 'Next Turn', () => { hideOverlay(); this.startStage(current + 1) })
-          }
-        } else {
-          this.state.loses = true
-          showOverlay('Game Over', `You needed >${this.state.stageTargetScore} this turn.`, 'New Game', () => this.newGame())
-        }
+    if (this.state.stageStartTime) {
+      const elapsedStage = (this.state.timeNow - this.state.stageStartTime) / 1000
+      timeLeft = Math.max(0, 60 - elapsedStage)
+      if (timeLeft === 0 && !this.finished) {
+        this.finished = true
+        showOverlay('Time Up', `Your score: ${this.state.score}`, 'New Game', () => this.newGame())
       }
     }
 
@@ -110,11 +100,7 @@ export class Game {
     setHUD([
       `Score: ${this.state.score}`,
       `Tasks: ${this.tasks.tasks.filter(t => t.active).length}`,
-      `Escapes: ${this.state.poacherEscapes}/5`,
-      `Stage: ${this.state.stage ?? 1}`,
-      `Time: ${Math.ceil(timeLeft)}`,
-      `Goal: >${this.state.stageTargetScore ?? 0} in ${this.state.stageTimeLimitSec ?? 0}s`,
-      `StagePts: ${this.state.stageScore ?? 0}`
+      `Time: ${Math.ceil(timeLeft)}`
     ], [
       this.state.wins ? 'Park Protected! 🏅' : this.state.loses ? 'Poachers prevailed...' : this.poacherActive ? 'Poacher active!' : 'Patrol on',
       this.guidance(),
@@ -257,11 +243,10 @@ export class Game {
     return 'Patrol the park and complete tasks'
   }
 
-  // Stage helpers
-  startStage(n: number) {
-    this.state.stage = n
-    const targets = [40, 50, 60, 70, 80]
-    this.state.stageTargetScore = targets[Math.min(targets.length - 1, n - 1)]
+  // Session helpers (single 60-second run)
+  startStage(_n: number) {
+    this.state.stage = 1
+    this.state.stageTargetScore = undefined
     this.state.stageTimeLimitSec = 60
     this.state.stageScore = 0
     this.state.stageStartTime = performance.now()
@@ -285,6 +270,7 @@ export class Game {
     this.state.loses = false
     this.state.timeStart = performance.now()
     this.state.timeNow = performance.now()
+    this.finished = false
     this.startStage(1)
   }
 }
