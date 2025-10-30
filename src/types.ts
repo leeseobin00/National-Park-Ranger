@@ -10,6 +10,7 @@ export interface Task {
   pos: Vec2
   active: boolean
   carried?: boolean
+  emoji?: string
 }
 
 export interface Entity {

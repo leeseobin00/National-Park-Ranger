@@ -25,8 +25,15 @@ export function randomTask(id: number, type: TaskType, map: number[][]): Task {
     const x = Math.floor(Math.random() * MAP_W)
     const y = Math.floor(Math.random() * MAP_H)
     if (isWalkable(map[y][x] as any)) {
-      return { id, type, pos: { x: x * TILE_SIZE + 8, y: y * TILE_SIZE + 8 }, active: true }
+      return { id, type, pos: { x: x * TILE_SIZE + 8, y: y * TILE_SIZE + 8 }, active: true, emoji: pickEmoji(type) }
     }
   }
-  return { id, type, pos: { x: 24, y: 24 }, active: true }
+  return { id, type, pos: { x: 24, y: 24 }, active: true, emoji: pickEmoji(type) }
+}
+
+function pickEmoji(type: TaskType): string {
+  if (type === 'trash') return '🗑️'
+  if (type === 'rescue') return '🐶'
+  if (type === 'bird') return '🐦'
+  return '❓'
 }

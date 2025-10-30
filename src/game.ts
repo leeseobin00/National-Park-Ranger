@@ -26,6 +26,7 @@ export class Game {
   };
   enablePoacher = false;
   finished = false;
+  waterDrops: { x: number; y: number }[] = [];
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
@@ -38,6 +39,7 @@ export class Game {
 
     // Initialize stage system
     this.startStage(1);
+    this.generateWaterDrops();
   }
 
   start() {
@@ -207,9 +209,13 @@ export class Game {
 
         // Emoji-style icons over tiles for vibe
         if (t === 1) drawEmoji(g, "🌲", px + TILE_SIZE / 2, py + TILE_SIZE / 2);
-        if (t === 2 && Math.random() < 0.02)
-          drawEmoji(g, "💧", px + TILE_SIZE / 2, py + TILE_SIZE / 2);
+        if (false) drawEmoji(g, "💧", px + TILE_SIZE / 2, py + TILE_SIZE / 2);
       }
+    }
+
+    // Fixed water droplets
+    for (const d of this.waterDrops) {
+      drawEmoji(g, "💧", d.x, d.y);
     }
 
     // Safe zone
@@ -222,15 +228,13 @@ export class Game {
     // Tasks
     for (const t of this.tasks.tasks) {
       if (!t.active) continue;
-      if (t.type === "trash") {
-        drawEmoji(g, "🗑️", t.pos.x, t.pos.y);
-      }
-      if (t.type === "rescue") {
-        drawEmoji(g, Math.random() < 0.5 ? "🐻" : "🦌", t.pos.x, t.pos.y);
-      }
-      if (t.type === "bird") {
-        drawEmoji(g, "🐦", t.pos.x, t.pos.y);
-      }
+      drawEmoji(
+        g,
+        (t as any).emoji ||
+          (t.type === "trash" ? "🗑️" : t.type === "rescue" ? "🦌" : "🐦"),
+        t.pos.x,
+        t.pos.y
+      );
     }
 
     // Carried rescue follows player
@@ -336,6 +340,27 @@ export class Game {
     this.state.timeNow = performance.now();
     this.finished = false;
     this.startStage(1);
+    this.generateWaterDrops();
+  }
+
+  // Deterministic water droplet placement per map
+  generateWaterDrops() {
+    const drops: { x: number; y: number }[] = [];
+    for (let y = 0; y < MAP_H; y++) {
+      for (let x = 0; x < MAP_W; x++) {
+        const t = this.map[y][x];
+        if (t === 2) {
+          const h = (((x * 73856093) ^ (y * 19349663)) >>> 0) % 25;
+          if (h === 0) {
+            drops.push({
+              x: x * TILE_SIZE + TILE_SIZE / 2,
+              y: y * TILE_SIZE + TILE_SIZE / 2,
+            });
+          }
+        }
+      }
+    }
+    this.waterDrops = drops;
   }
 }
 
