@@ -8,6 +8,14 @@ export class Input {
     this.el.addEventListener('keyup', (e: Event) => this.keys.delete((e as KeyboardEvent).key.toLowerCase()))
 
     const canvas = document.getElementById('game') as HTMLCanvasElement
+    this.el.addEventListener('keydown', (e: Event) => {
+      const ke = e as KeyboardEvent
+      if (ke.code === 'Space' || ke.key === ' ') {
+        ke.preventDefault()
+        const ev = new CustomEvent('game:tap', { detail: { x: 0, y: 0 } })
+        canvas.dispatchEvent(ev)
+      }
+    })
     canvas.addEventListener('touchstart', e => {
       const t = e.touches[0]
       this.touchStart = { x: t.clientX, y: t.clientY }

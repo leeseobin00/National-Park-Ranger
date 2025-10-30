@@ -2,7 +2,7 @@ export function setHUD(left: string[], right: string[]) {
   const l = document.getElementById('hud-left')!
   const r = document.getElementById('hud-right')!
   l.textContent = left.join('  |  ')
-  r.textContent = right.join('  |  ')
+  r.innerHTML = right.join('<br>')
 }
 
 export function showOverlay(title: string, text: string, buttonLabel?: string, onClick?: () => void) {
